@@ -1,0 +1,267 @@
+---
+import { getCollection } from 'astro:content';
+
+// Layout import — provides basic page elements: <head>, <nav>, <footer> etc.
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Component Imports
+import Audio from '../components/Audio.astro'
+import CallToAction from '../components/CallToAction.astro';
+import Grid from '../components/Grid.astro';
+import Hero from '../components/Hero.astro';
+import Icon from '../components/Icon.astro';
+import Pill from '../components/Pill.astro';
+import PortfolioPreview from '../components/PortfolioPreview.astro';
+
+// Page section components
+import ContactCTA from '../components/ContactCTA.astro';
+import Skills from '../components/Skills.astro';
+
+// Content Fetching: List four most recent locutores projects
+const projects = (await getCollection('locutores'))
+	.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
+	.slice(0, 4);
+
+// Full Astro Component Syntax:
+// https://docs.astro.build/core-concepts/astro-components/
+---
+
+<BaseLayout>
+	<div class="stack gap-10 lg:gap-20">
+		<div class="wrapper stack gap-8 lg:gap-20">
+			<header class="hero">
+				<Hero
+					title="Malibú Stereo"
+					tagline="¡Bienvenidos a Malibú Stereo, radio online, donde la música y la buena vibra nunca se acaban!"
+					align="start"
+				>
+					<div class="roles">						
+						<button class="play-button" onclick="document.getElementById('player').play()">
+							<Pill><Icon icon="play-icon" size="1.33em" />Escuchanos</Pill>
+						</button>
+						<a href="https://wa.me/+573152148597?		text=Hola%20Malib%C3%BA%2C%20estoy%20en%20sinton%C3%ADa%2C%20escribo%20desde%20la%20p%C3%A1gina." target="_blank"><Pill>
+							<Icon icon="whatsapp-logo" size="1.33em" />Escribenos</Pill>
+						</a>
+					</div>
+				</Hero>
+
+				<div class="content">
+					<div class="mi-reproductor">
+					<img
+						alt="Malibu Radio Online Colores"
+						width="512"
+						height="512"
+						src="/assets/ia-image-bella-mujer-musica.jpg"					
+					/>
+					<div class="overlay">Play</div>
+					</div>
+					<Audio/>															
+				</div>
+					
+			</header>
+			<Skills />
+		</div>
+
+		<main class="wrapper stack gap-10 lg:gap-20">			
+
+			<section class="section with-background bg-variant">
+				<header class="section-header stack gap-2 lg:gap-4">
+					<h3>Música 24 Horas</h3>
+					<p>
+						Disfruta de la mejor música, directamente desde el hermoso y encantador pueblo de <b>Pinilos - Bolívar</b>
+					</p>
+				</header>
+
+				<div class="gallery">
+					<Grid variant="small">
+						{
+							['Vallenato', 'Merengue', 'Salsa', 'Folclor', 'Todos los generos, los mejores Artistas'].map((brand) => (
+								<li class="mention-card">
+									<p>{brand}</p>
+								</li>
+							))
+						}
+					</Grid>
+				</div>
+			</section>
+		</main>
+
+		<ContactCTA />
+	</div>
+</BaseLayout>
+
+<style>
+
+.mi-reproductor {
+  position: relative;
+}
+
+.mi-reproductor img {
+  display: block;
+  width: 100%;
+}
+
+.mi-reproductor .overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+	.play-button {
+		display: flex;
+		border: 0;
+		border-radius: 999rem;
+		padding: 0;
+		background-color: var(--gray-999);
+		box-shadow: inset 0 0 0 1px var(--accent-overlay);
+		cursor: pointer;
+	}
+
+	.hero {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 2rem;
+	}
+
+	.roles {
+		display: none;
+	}
+
+	.hero img {
+		aspect-ratio: 5 / 4;
+		object-fit: cover;
+		object-position: top;
+		border-radius: 1.5rem;
+		box-shadow: var(--shadow-md);
+	}	
+	
+
+	@media (min-width: 50em) {
+		.hero {
+			display: grid;
+			grid-template-columns: 6fr 4fr;
+			padding-inline: 2.5rem;
+			gap: 3.75rem;
+		}
+
+		.roles {
+			margin-top: 0.5rem;
+			display: flex;
+			gap: 0.5rem;
+		}
+
+		.hero img {
+			aspect-ratio: 3 / 4;
+			border-radius: 4.5rem;
+			object-fit: cover;
+		}
+	}
+
+	/* ====================================================== */
+
+	.section {
+		display: grid;
+		gap: 2rem;
+	}
+
+	.with-background {
+		position: relative;
+	}
+
+	.with-background::before {
+		--hero-bg: var(--bg-image-subtle-2);
+
+		content: '';
+		position: absolute;
+		pointer-events: none;
+		left: 50%;
+		width: 100vw;
+		aspect-ratio: calc(2.25 / var(--bg-scale));
+		top: 0;
+		transform: translateY(-75%) translateX(-50%);
+		background: url('/assets/backgrounds/noise.png') top center/220px repeat,
+			var(--hero-bg) center center / var(--bg-gradient-size) no-repeat, var(--gray-999);
+		background-blend-mode: overlay, normal, normal, normal;
+		mix-blend-mode: var(--bg-blend-mode);
+		z-index: -1;
+	}
+
+	.with-background.bg-variant::before {
+		--hero-bg: var(--bg-image-subtle-1);
+	}
+
+	.section-header {
+		justify-self: center;
+		text-align: center;
+		max-width: 50ch;
+		font-size: var(--text-md);
+		color: var(--gray-300);
+	}
+
+	.section-header h3 {
+		font-size: var(--text-2xl);
+	}
+
+	@media (min-width: 50em) {
+		.section {
+			grid-template-columns: repeat(4, 1fr);
+			grid-template-areas: 'header header header header' 'gallery gallery gallery gallery';
+			gap: 5rem;
+		}
+
+		.section.with-cta {
+			grid-template-areas: 'header header header cta' 'gallery gallery gallery gallery';
+		}
+
+		.section-header {
+			grid-area: header;
+			font-size: var(--text-lg);
+		}
+
+		.section-header h3 {
+			font-size: var(--text-4xl);
+		}
+
+		.with-cta .section-header {
+			justify-self: flex-start;
+			text-align: left;
+		}
+
+		.gallery {
+			grid-area: gallery;
+		}
+
+		.cta {
+			grid-area: cta;
+		}
+	}
+
+	/* ====================================================== */
+
+	.mention-card {
+		display: flex;
+		height: 3.5rem;
+		justify-content: center;
+		align-items: center;
+		text-align: center;
+		border: 1px solid var(--gray-800);
+		border-radius: 1.5rem;
+		color: var(--gray-300);
+		background: var(--gradient-subtle);
+		box-shadow: var(--shadow-sm);
+	}
+
+	@media (min-width: 50em) {
+		.mention-card {
+			border-radius: 1.5rem;
+			height: 4.5rem;
+		}
+	}
+</style>

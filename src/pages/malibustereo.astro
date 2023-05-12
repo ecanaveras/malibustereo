@@ -1,0 +1,118 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+import ContactCTA from '../components/ContactCTA.astro';
+import Hero from '../components/Hero.astro';
+---
+
+<BaseLayout title="Acerca de | Malibu Stereo" description="Malibu Stereo Radio Online">
+	<div class="stack gap-20">
+		<main class="wrapper about">
+			<Hero
+				title="Malibu Stereo"
+				tagline="¡Tu emisora online de música y entretenimiento las 24 horas del día!"
+			>
+				<img
+					width="512"
+					height="512"
+					src="/assets/ia-image-bella-mujer-musica.jpg"
+					alt="logo-malibu"
+				/>
+			</Hero>
+
+			<section>
+				<h2 class="section-title">Quíenes Somos</h2>
+				<div class="content">
+					<p>
+						¡Bienvenidos a Malibú Stereo, tu emisora online de música variada y entretenimiento las 24 horas del día! En Malibú Stereo, nuestra misión es proporcionarte una experiencia auditiva única y agradable que te permita desconectar del mundo y disfrutar de la mejor selección musical.
+					</p>
+					<br><p>Transmitimos en la banda FM 94.5, y a través de Internet</p>
+					<br><p>
+						Nuestra música, va desde los clásicos hasta los últimos éxitos del momento, en Malibú Stereo encontrarás una amplia variedad de géneros musicales para todos los gustos. estamos seguros de que encontrarás algo que te encantará.
+					</p>
+					<br><p>
+						Además de nuestra programación musical, también ofrecemos programas en vivo con nuestros talentosos locutores, quienes te mantendrán informado sobre las noticias más relevantes del mundo del entretenimiento y te brindarán entretenidos segmentos de conversación y entrevistas con artistas.
+					</p>
+					<br><p>
+						¿Qué estás esperando? Únete a nuestra comunidad de oyentes y disfruta de la mejor música y entretenimiento en Malibú Stereo. ¡Te esperamos!
+					</p>
+				</div>
+			</section>
+			<section>
+				<h2 class="section-title">Ubicación</h2>
+				<div class="content">
+					<p>Ubicanos cerca al parque principal de Pinillos, Bólivar, Colombia.</p>
+				</div>
+			</section>
+			<section>
+				<h2 class="section-title">Contacto</h2>
+				<div class="content">
+					<p>Llamanos ó escribenos al <b>+57 315 2148597</b></p>
+					<p>William Almanza Rangel</p>
+					<p>Gary Rangel Rojas</p>
+				</div>
+			</section>
+		</main>
+
+		<ContactCTA />
+	</div>
+</BaseLayout>
+
+<style>
+	.about {
+		display: flex;
+		flex-direction: column;
+		gap: 3.5rem;
+	}
+
+	img {
+		margin-top: 1.5rem;
+		margin: auto;
+		border-radius: 1.5rem;
+		box-shadow: var(--shadow-md);
+	}
+
+	section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		color: var(--gray-200);
+	}
+
+	.section-title {
+		grid-column-start: 1;
+		font-size: var(--text-xl);
+		color: var(--gray-0);
+	}
+
+	.content {
+		grid-column: 2 / 4;
+	}
+
+	.content :global(a) {
+		text-decoration: 1px solid underline transparent;
+		text-underline-offset: 0.25em;
+		transition: text-decoration-color var(--theme-transition);
+	}
+
+	.content :global(a:hover),
+	.content :global(a:focus) {
+		text-decoration-color: currentColor;
+	}
+
+	@media (min-width: 50em) {
+		.about {
+			display: grid;
+			grid-template-columns: 1fr 60% 1fr;
+		}
+
+		.about > :global(:first-child) {
+			grid-column-start: 2;
+		}
+
+		section {
+			display: contents;
+			font-size: var(--text-lg);
+		}
+	}
+</style>

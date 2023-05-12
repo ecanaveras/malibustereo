@@ -1,0 +1,38 @@
+---
+import { getCollection } from 'astro:content';
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+import ContactCTA from '../components/ContactCTA.astro';
+import LocutoresPreview from '../components/LocutoresPreview.astro';
+import Hero from '../components/Hero.astro';
+import Grid from '../components/Grid.astro';
+
+const projects = (await getCollection('locutores')).sort(
+	(a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf()
+);
+---
+
+<BaseLayout
+	title="Locutores | Malibú"
+	description="Los mejores locutores, con la mejor programación y la mejor música online"
+>
+	<div class="stack gap-20">
+		<main class="wrapper stack gap-8">
+			<Hero
+				title="Nuestros Locutores"
+				tagline="Nuestro colbaroadores son los mejores, con excelente programación y la mejor música online"
+			/>
+			<Grid variant="offset">
+				{
+					projects.map((project) => (
+						<li>
+							<LocutoresPreview project={project} />							
+						</li>
+					))
+				}
+			</Grid>			
+		</main>
+		<ContactCTA />
+	</div>
+</BaseLayout>

@@ -1,0 +1,110 @@
+<div class"content-radio">
+  <audio id="player" class="mi-audio" controls autoplay >
+    <source src="https://stream.zeno.fm/njvpvqjqxkotv" type="audio/mpeg">
+  </audio>	
+  <!-- <div> 
+    <button onclick="document.getElementById('player').play()">Play</button> 
+    <button onclick="document.getElementById('player').pause()">Pause</button> 
+    <button onclick="document.getElementById('player').volume += 0.1">Vol +</button> 
+    <button onclick="document.getElementById('player').volume -= 0.1">Vol -</button> 
+  </div> - ->
+
+    <div class="audio-player">
+    <div class="icon-container">
+      <svg xmlns="http://www.w3.org/2000/svg" class="audio-icon" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+      </svg>
+        <audio src="https://www.zapsplat.com/wp-content/uploads/2015/sound-effects-61905/zapsplat_multimedia_alert_chime_short_musical_notification_cute_child_like_001_64918.mp3?_=1"></audio>
+    </div>
+  </div>-->
+  
+</div>
+
+
+
+<style>  
+
+  .mi-audio{
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    
+  }
+	
+  audio::-webkit-media-controls-panel{
+    position: relative;
+		display: flex;
+		place-content: center;		
+		padding: 0.56em 2em;
+		gap: 0.8em;
+		color: var(--accent-text-over);		
+		line-height: 1.1;
+		border-radius: 0%;
+		overflow: hidden;
+		background: var(--gradient-accent-orange);
+		box-shadow: var(--shadow-md);	    
+  }
+
+  
+  audio::-webkit-media-controls-play-button{
+    background-color: hsla(var(--gray-999-basis), 0.5);
+    border-radius: 50%;
+  }
+
+  audio::-webkit-media-controls-play-button:hover {      
+    background-color: hsla(var(--gray-999-basis), 0.8);
+  }
+
+  audio::-webkit-media-controls-mute-button{
+    background-color: hsla(var(--gray-999-basis), 0.1);
+    border-radius: 50%;
+  }
+
+  audio::-webkit-media-controls-mute-button:hover{
+    background-color: hsla(var(--gray-999-basis), 0.5);   
+  }
+
+  audio::-webkit-media-controls-volume-slider{   
+    background-color: hsla(var(--gray-999-basis), 0.1);
+    border-radius: 2px;
+    margin-left: 2px;
+    margin-right: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  audio::-webkit-media-controls-volume-slider:hover{
+    background-color: hsla(var(--gray-999-basis), 0.5);
+  }
+  
+  audio::-webkit-media-controls-timeline:hover{      
+    background-color: hsla(var(--gray-999-basis), 0.1);
+}
+
+
+
+/* AUDIO STYLE
+audio::-webkit-media-controls-timeline{      
+}
+
+audio::-webkit-media-controls-volume-slider-container{
+
+}
+
+audio::-webkit-media-controls-volume-slider{}
+
+audio::-webkit-media-controls-seek-back-button{}
+
+audio::-webkit-media-controls-seek-forward-button{}
+
+audio::-webkit-media-controls-fullscreen-button{}
+
+audio::-webkit-media-controls-rewind-button{}
+
+audio::-webkit-media-controls-return-to-realtime-button{}
+
+audio::-webkit-media-controls-toggle-closed-captions-button{}
+    */
+
+
+</style>
