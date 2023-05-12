@@ -7,9 +7,14 @@ import Icon from '../components/Icon.astro';
 
 <BaseLayout title="Malibu | Whatsapp" description="Contactanos">
   <main class="wrapper stack gap-10">
-    <Hero title="Whatsapp" tagline="Escribenos al +57 315 2148597" />
+			<header>
+				<div class="wrapper stack gap-2">
+					<a class="back-link" href="/"><Icon icon="arrow-left" /> Volver</a>					
+				</div>
+			</header>
+    	<Hero title="Whatsapp" tagline="Escribenos al +57 315 2148597" />
     	<div class="content-button">			
-				<a href="https://wa.me/+573152148597?text=Hola%20Malib%C3%BA%2C%20estoy%20en%20sinton%C3%ADa%2C%20escribo%20desde%20la%20p%C3%A1gina." target="_blank">
+				<a class="whatsapp-btn" href="https://wa.me/+573152148597?text=Hola%20Malib%C3%BA%2C%20estoy%20en%20sinton%C3%ADa%2C%20escribo%20desde%20la%20p%C3%A1gina." target="_blank">
 				<Icon icon="whatsapp-logo" size="1.33em" />Ir al Chat</a>      
       </div>
     
@@ -23,7 +28,7 @@ import Icon from '../components/Icon.astro';
     margin: auto;
   }
 
-	a {
+	.whatsapp-btn {
 		position: relative;
 		display: flex;
 		place-content: center;
@@ -42,7 +47,7 @@ import Icon from '../components/Icon.astro';
 	}
 
 	@media (min-width: 20em) {
-		a {
+		.whatsapp-btn {
 			font-size: var(--text-lg);
 		}
 	}
