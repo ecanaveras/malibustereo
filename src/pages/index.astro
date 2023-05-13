@@ -53,7 +53,7 @@ const projects = (await getCollection('locutores'))
 						height="512"
 						src="/assets/ia-image-bella-mujer-musica.jpg"					
 					/>
-					<div class="overlay">Play</div>
+					<div id="megaplay" class="overlay"><span class="text-play">Play</span></div>
 					</div>
 					<Audio/>															
 				</div>
@@ -90,28 +90,67 @@ const projects = (await getCollection('locutores'))
 	</div>
 </BaseLayout>
 
+<script>
+	
+	const player = document.getElementById('player');
+	const divplay = document.querySelector('div.overlay');
+	const textplay = document.querySelector('span.text-play');		
+	//console.log(textplay.innerHTML)
+	divplay.addEventListener('click', () => {		
+		if(textplay.innerHTML != "Play"){
+			player.pause();
+		}else{
+			player.play();
+		}				
+	}); 
+	
+	player.onplay = function(){
+		textplay.innerHTML = "Pause";
+	}
+	
+
+	player.onpause = function() {
+		textplay.innerHTML = "Play";
+	}
+	
+	
+</script>
+
 <style>
 
-.mi-reproductor {
-  position: relative;
-}
+	.mi-reproductor {
+		position: relative;
+	}
 
-.mi-reproductor img {
-  display: block;
-  width: 100%;
-}
+	.mi-reproductor img {
+		display: block;
+		width: 100%;
+	}
 
-.mi-reproductor .overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: bold;
-}
+	.mi-reproductor .overlay {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		font-size: 2rem;
+		color: white;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		font-weight: bold;
+	}
+
+	.overlay {
+		cursor: pointer;
+		width: 100%;
+		height: 100%;				
+		display: flex;
+  	justify-content: center;
+  	align-items: center;
+	}
+
+	.text-play {				
+		text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+	}
 
 	.play-button {
 		display: flex;
@@ -122,6 +161,7 @@ const projects = (await getCollection('locutores'))
 		box-shadow: inset 0 0 0 1px var(--accent-overlay);
 		cursor: pointer;
 	}
+	
 
 	.hero {
 		display: flex;
