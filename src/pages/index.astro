@@ -47,7 +47,7 @@ const projects = (await getCollection('locutores'))
 
 				<div class="content">
 					<div class="mi-reproductor">
-					<img
+					<img id="img-play"
 						alt="Malibu Radio Online Colores"
 						width="512"
 						height="512"
@@ -92,6 +92,21 @@ const projects = (await getCollection('locutores'))
 
 <script>
 	
+	//Imagenes
+	// Define un array con las rutas de las imágenes
+	var imagenes = ["ia_001.jpg", "ia_002.jpg", "ia_003.jpg", "ia_004.jpg", "ia_005.jpg", "ia_006.jpg", "ia_007.jpg"];
+
+	// Obtiene el elemento img con id "img-play"
+	var img = document.getElementById('img-play');
+
+	// Selecciona una imagen aleatoria del array
+	var index = Math.floor(Math.random() * imagenes.length);
+	var imagenSeleccionada = imagenes[index];
+
+	// Cambia la src de la imagen por la imagen seleccionada
+	img.src = "/assets/"+imagenSeleccionada;
+
+	//Reproductor
 	const player = document.getElementById('player');
 	const divplay = document.querySelector('div.overlay');
 	const textplay = document.querySelector('span.text-play');		
