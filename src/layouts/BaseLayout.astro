@@ -6,16 +6,19 @@
 import MainHead from '../components/MainHead.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import Community from '../components/Community.astro';
 
 interface Props {
 	title?: string | undefined;
 	description?: string | undefined;
+	/** Si es false, la página coloca el chat donde prefiera. */
+	showCommunity?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, showCommunity = true } = Astro.props;
 ---
 
-<html lang="en">
+<html lang="es">
 	<head>
 		<MainHead title={title} description={description} />
 	</head>
@@ -23,6 +26,7 @@ const { title, description } = Astro.props;
 		<div class="stack backgrounds">
 			<Nav />
 			<slot />
+			{showCommunity && <Community />}
 			<Footer />
 		</div>
 
@@ -89,7 +93,7 @@ const { title, description } = Astro.props;
 			}
 
 			.backgrounds {
-				min-height: 100%;
+				min-height: 100vh;
 				isolation: isolate;
 				background:
 					/*noise*/ url('/assets/backgrounds/noise.png') top center/220px repeat,

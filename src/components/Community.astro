@@ -1,0 +1,589 @@
+---
+// Emojis del selector. El nombre se usa como etiqueta accesible de cada botón.
+import Icon from './Icon.astro';
+
+interface Props {
+  /** true cuando el chat ya vive dentro de un contenedor con ancho y padding. */
+  inline?: boolean;
+}
+const { inline = false } = Astro.props;
+const emojis = [
+  { char: '😀', name: 'Felicidad' },
+  { char: '😄', name: 'Muy feliz' },
+  { char: '😂', name: 'Risa' },
+  { char: '🥳', name: 'Celebración' },
+  { char: '🎂', name: 'Cumpleaños' },
+  { char: '🎉', name: 'Fiesta' },
+  { char: '👍', name: 'Me gusta' },
+  { char: '👏', name: 'Aplausos' },
+  { char: '🙌', name: 'Manos arriba' },
+  { char: '💜', name: 'Corazón morado' },
+  { char: '❤️', name: 'Corazón rojo' },
+  { char: '🔥', name: 'Fuego' },
+  { char: '💯', name: 'Cien por ciento' },
+  { char: '😍', name: 'Enamorado' },
+  { char: '🤩', name: 'Asombrado' },
+  { char: '😮', name: 'Sorprendido' },
+  { char: '😡', name: 'Enojo' },
+  { char: '😴', name: 'Sueño' },
+  { char: '⚽', name: 'Balón de fútbol' },
+  { char: '🏆', name: 'Trofeo' },
+  { char: '🇨🇴', name: 'Bandera de Colombia' },
+  { char: '🌎', name: 'Mundo' },
+  { char: '🚀', name: 'Cohete' },
+  { char: '✨', name: 'Brillos' },
+  { char: '📻', name: 'Radio' },
+  { char: '🎵', name: 'Música' },
+  { char: '🎶', name: 'Notas musicales' },
+  { char: '🎤', name: 'Micrófono' },
+  { char: '🎧', name: 'Audífonos' },
+  { char: '🕺', name: 'Baile' },
+  { char: '☕', name: 'Café' },
+  { char: '🙏', name: 'Gracias' },
+];
+---
+
+<section class:list={['community', { wrapper: !inline }]} aria-labelledby="community-title">
+  <div class="community-panel">
+    <header class="community-heading">
+      <div>
+        <h2 id="community-title">Chat Malibú Stereo</h2>
+        <p>Saluda, pide tu canción y comparte la buena vibra.</p>
+      </div>
+      <div class="community-presence">
+        <button
+          type="button"
+          class="community-avatar"
+          data-open-nickname
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-label="Elegir apodo"
+        >
+          <span aria-hidden="true" data-nickname-initial>?</span>
+        </button>
+        <p class="community-count" data-online-count aria-live="polite">
+          <span class="community-count-dot" aria-hidden="true"></span>
+          <span data-online-count-text>Conectando…</span>
+        </p>
+      </div>
+    </header>
+
+    <p class="community-note">Chat público · Solo mensajes en vivo, sin historial.</p>
+
+    <div
+      class="community-messages"
+      role="log"
+      aria-label="Mensajes del chat"
+      aria-live="polite"
+      aria-relevant="additions"
+      tabindex="0"
+    >
+      <p class="community-empty">Los mensajes nuevos aparecerán aquí cuando estés conectado.</p>
+    </div>
+
+    <form class="community-form">
+      <input type="hidden" name="name" value="" />
+      <div class="community-compose">
+        <label for="community-message" class="sr-only">Mensaje</label>
+        <button
+          type="button"
+          class="emoji-toggle"
+          aria-expanded="false"
+          aria-controls="community-emojis"
+          aria-label="Insertar emoji"
+          data-emoji-toggle
+        >
+          <span aria-hidden="true">😊</span>
+        </button>
+        <textarea
+          id="community-message"
+          name="text"
+          rows="1"
+          maxlength="300"
+          required
+          aria-describedby="community-help"
+          placeholder="Escribe a los demás oyentes…"
+        ></textarea>
+        <button type="submit" class="community-send" aria-label="Enviar mensaje" disabled>
+          <Icon icon="paper-plane-tilt" size="1.35em" color="#ffffff" />
+        </button>
+
+        <div class="community-emojis" id="community-emojis" data-emoji-panel hidden>
+          {
+            emojis.map((emoji) => (
+              <button type="button" data-emoji={emoji.char} aria-label={emoji.name} title={emoji.name}>
+                <span aria-hidden="true">{emoji.char}</span>
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      <small id="community-help">Máximo 300 caracteres. Un mensaje cada 3 segundos. Enter envía.</small>
+      <p class="community-feedback" role="status" aria-live="polite"></p>
+    </form>
+
+    <noscript>Activa JavaScript para ver las personas conectadas y participar en el chat.</noscript>
+  </div>
+</section>
+
+<dialog class="nickname-dialog" data-nickname-dialog aria-labelledby="nickname-title">
+  <form method="dialog" data-nickname-form>
+    <h2 id="nickname-title">¿Cómo te llamas?</h2>
+    <p>Elige un apodo para entrar al chat. Puedes cambiarlo cuando quieras.</p>
+    <label for="nickname-input">Tu apodo</label>
+    <input
+      id="nickname-input"
+      name="nickname"
+      minlength="2"
+      maxlength="24"
+      required
+      autocomplete="nickname"
+      placeholder="Por ejemplo: María"
+      data-nickname-input
+    />
+    <p class="nickname-error" data-nickname-error role="alert"></p>
+    <div class="nickname-actions">
+      <button type="button" value="cancel" data-nickname-cancel>Ahora no</button>
+      <button type="submit" value="save" data-nickname-save>Entrar al chat</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  import '../scripts/community';
+</script>
+
+<style is:global>
+  /* Respaldo para navegadores WebKit (Safari): scroll fino y morado. */
+  .community-panel :is(textarea, .community-messages, .community-emojis)::-webkit-scrollbar {
+    width: 0.55rem;
+    height: 0.55rem;
+  }
+
+  .community-panel :is(textarea, .community-messages, .community-emojis)::-webkit-scrollbar-track,
+  .community-panel :is(textarea, .community-messages, .community-emojis)::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  .community-panel :is(textarea, .community-messages, .community-emojis)::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999rem;
+    background-color: hsl(280 80% 62% / 0.5);
+    background-clip: content-box;
+  }
+
+  .community-panel :is(textarea, .community-messages, .community-emojis)::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(280 80% 62% / 0.85);
+  }
+</style>
+
+<style>
+  .community {
+    margin-block: 3rem;
+  }
+
+  .community-panel {
+    display: grid;
+    gap: 1rem;
+    border: 1px solid var(--gray-700);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    background: var(--gray-999);
+    box-shadow: var(--shadow-sm);
+    /* Morado estable en tema claro y oscuro. */
+    --chat-accent: #a855f7;
+    --chat-accent-strong: #7611a6;
+    --chat-accent-soft: hsl(280 80% 60% / 0.16);
+  }
+
+  .community-heading {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+  }
+
+  .community-heading h2 {
+    font-size: var(--text-xl);
+    margin-bottom: 0.35rem;
+  }
+
+  .community-heading p,
+  .community-note,
+  small {
+    color: var(--gray-300);
+  }
+
+  .community-note {
+    font-size: var(--text-sm);
+  }
+
+  .community-presence {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Inicial del apodo: abre el popup para cambiarlo. */
+  .community-avatar {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: none;
+    border: 1px solid #c561f6;
+    border-radius: 50%;
+    padding: 0;
+    background: linear-gradient(140deg, #7c1fb0, #4c11c6);
+    color: #fff;
+    font: inherit;
+    font-size: var(--text-base);
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 6px 18px -8px #7611a6;
+    transition: transform var(--theme-transition), filter var(--theme-transition);
+  }
+
+  .community-avatar:hover {
+    filter: brightness(1.12);
+    transform: scale(1.05);
+  }
+
+  /* Personas conectadas: mantener el tamaño de texto por defecto. */
+  .community-panel p.community-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid #c561f6;
+    border-radius: 999rem;
+    padding: 0.5rem 1rem;
+    font-size: inherit;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: #fff;
+    white-space: nowrap;
+    background: linear-gradient(140deg, #7c1fb0, #4c11c6);
+    box-shadow: 0 6px 18px -6px #7611a6;
+  }
+
+  .community-count-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: #7dffb2;
+    box-shadow: 0 0 0 3px hsl(145 100% 74% / 0.18);
+    animation: community-pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes community-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .community-count-dot {
+      animation: none;
+    }
+    .community-avatar {
+      transition: none;
+    }
+  }
+
+  .community-messages {
+    height: clamp(14rem, 45vh, 26rem);
+    overflow-y: auto;
+    overflow-wrap: anywhere;
+    border: 1px solid hsl(220 12% 55% / 0.24);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    background: hsl(220 12% 55% / 0.10);
+    scrollbar-width: thin;
+  }
+
+  .community-empty {
+    color: var(--gray-300);
+  }
+
+  .community-messages :global(article) {
+    padding-block: 0.75rem;
+    border-bottom: 1px solid hsl(220 12% 55% / 0.22);
+  }
+
+  .community-messages :global(article:last-child) {
+    border-bottom: 0;
+  }
+
+  .community-messages :global(article:first-child) {
+    padding-top: 0;
+  }
+
+  .community-messages :global(strong) {
+    color: var(--gray-100);
+  }
+
+  .community-messages :global(time) {
+    font-size: var(--text-sm);
+    color: var(--gray-300);
+    margin-left: 0.75rem;
+  }
+
+  .community-messages :global(p) {
+    white-space: pre-wrap;
+    margin-top: 0.15rem;
+  }
+
+  .community-form {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  /* Fila única: emoji · texto · enviar */
+  .community-compose {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  label {
+    color: var(--gray-100);
+    font-weight: 600;
+  }
+
+  textarea {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    max-height: 7.5rem;
+    border: 1px solid var(--gray-600);
+    border-radius: 1.25rem;
+    padding: 0.65rem 0.9rem;
+    font: inherit;
+    line-height: 1.4;
+    background: var(--gray-999);
+    color: var(--gray-100);
+    resize: none;
+    overflow-y: auto;
+  }
+
+  textarea::placeholder {
+    color: var(--gray-300);
+  }
+
+  /* Barra de scroll moderna: fina, redondeada y acorde al tema oscuro. */
+  .community-panel :is(textarea, .community-messages, .community-emojis) {
+    scrollbar-width: thin;
+    scrollbar-color: #a855f7 transparent;
+  }
+
+  .emoji-toggle,
+  .community-send {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .emoji-toggle {
+    border: 1px solid var(--gray-700);
+    border-radius: 50%;
+    background: var(--gray-900);
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  .emoji-toggle:hover,
+  .emoji-toggle[aria-expanded='true'] {
+    border-color: var(--chat-accent);
+    background: var(--chat-accent-soft);
+  }
+
+  .community-send {
+    border: 0;
+    border-radius: 50%;
+    background: var(--chat-accent-strong);
+    color: #fff;
+  }
+
+  .community-send:hover:not(:disabled) {
+    filter: brightness(1.2);
+  }
+
+  .community-send:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Panel flotante de emojis, anclado a la fila de escritura. */
+  .community-emojis {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 0.5rem);
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(2.5rem, 1fr));
+    gap: 0.3rem;
+    width: min(19rem, calc(100vw - 3rem));
+    max-height: 11rem;
+    overflow-y: auto;
+    border: 1px solid var(--chat-accent);
+    border-radius: 1rem;
+    padding: 0.5rem;
+    background: var(--gray-900);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .community-emojis[hidden] {
+    display: none;
+  }
+
+  .community-emojis button {
+    min-height: 40px;
+    border: 0;
+    border-radius: 0.6rem;
+    background: transparent;
+    font-size: 1.35rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .community-emojis button:hover,
+  .community-emojis button:focus-visible {
+    background: var(--chat-accent-soft);
+    transform: scale(1.08);
+  }
+
+  :is(textarea, button, .community-messages):focus-visible {
+    outline: 3px solid var(--link-color);
+    outline-offset: 3px;
+  }
+
+  .community-feedback {
+    min-height: 1.5em;
+    color: var(--gray-200);
+    font-size: var(--text-sm);
+  }
+
+  /* Popup del apodo, centrado en la pantalla */
+  .nickname-dialog {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    width: min(26rem, calc(100vw - 2rem));
+    height: fit-content;
+    max-height: calc(100dvh - 2rem);
+    border: 1px solid #a855f7;
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    background: var(--gray-999);
+    color: var(--gray-200);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .nickname-dialog::backdrop {
+    background: hsl(260 60% 8% / 0.65);
+    backdrop-filter: blur(3px);
+  }
+
+  .nickname-dialog form {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .nickname-dialog h2 {
+    font-size: var(--text-xl);
+    color: var(--gray-100);
+  }
+
+  .nickname-dialog p {
+    color: var(--gray-300);
+    font-size: var(--text-sm);
+  }
+
+  .nickname-dialog input {
+    width: 100%;
+    min-height: 48px;
+    border: 1px solid var(--gray-600);
+    border-radius: 0.75rem;
+    padding: 0.7rem 0.85rem;
+    font: inherit;
+    font-size: var(--text-md);
+    background: var(--gray-900);
+    color: var(--gray-100);
+  }
+
+  .nickname-error {
+    min-height: 1.25em;
+    color: #d3243f;
+    font-size: var(--text-sm);
+  }
+
+  .nickname-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap-reverse;
+    justify-content: flex-end;
+  }
+
+  .nickname-actions button {
+    min-height: 44px;
+    border-radius: 999rem;
+    padding: 0.65rem 1.25rem;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .nickname-actions button[value='cancel'] {
+    border: 1px solid var(--gray-700);
+    background: transparent;
+    color: var(--gray-100);
+  }
+
+  .nickname-actions button[value='save'] {
+    border: 0;
+    background: var(--accent-regular);
+    color: #fff;
+  }
+
+  @media (min-width: 50em) {
+    .community {
+      margin-block: 4rem;
+    }
+
+    .community-panel {
+      gap: 1.25rem;
+      border-radius: 1.5rem;
+      padding: 2rem;
+    }
+
+    .community-heading h2 {
+      font-size: var(--text-2xl);
+    }
+
+    .community-avatar {
+      width: 3rem;
+      height: 3rem;
+      font-size: var(--text-md);
+    }
+
+    .community-emojis {
+      width: 22rem;
+      max-height: 12.5rem;
+    }
+  }
+</style>

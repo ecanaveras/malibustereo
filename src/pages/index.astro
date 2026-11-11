@@ -7,6 +7,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 // Component Imports
 import Audio from '../components/Audio.astro'
 import CallToAction from '../components/CallToAction.astro';
+import Community from '../components/Community.astro';
 import Grid from '../components/Grid.astro';
 import Hero from '../components/Hero.astro';
 import Icon from '../components/Icon.astro';
@@ -26,7 +27,7 @@ const projects = (await getCollection('locutores'))
 // https://docs.astro.build/core-concepts/astro-components/
 ---
 
-<BaseLayout>
+<BaseLayout showCommunity={false}>
 	<div class="stack gap-10 lg:gap-20">
 		<div class="wrapper stack gap-8 lg:gap-20">
 			<header class="hero">
@@ -59,6 +60,8 @@ const projects = (await getCollection('locutores'))
 				</div>
 					
 			</header>
+
+			<Community inline />
 			<Skills />
 		</div>
 

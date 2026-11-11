@@ -1,0 +1,12 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "COMMUNITY_PUBSUB_CONNECTION": "",
+    "COMMUNITY_STORAGE_CONNECTION": "",
+    "COMMUNITY_SESSION_SECRET": "",
+    "COMMUNITY_ORIGINS": "https://YOUR-SITE",
+    "COMMUNITY_HUB": "malibu",
+    "COMMUNITY_TABLE": "MalibuPresence"
+  }
+}

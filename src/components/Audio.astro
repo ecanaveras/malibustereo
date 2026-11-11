@@ -2,6 +2,7 @@
   <audio id="player" class="mi-audio" controls autoplay >
     <source src="https://stream.zeno.fm/njvpvqjqxkotv" type="audio/mpeg">
   </audio>	
+  <p class="online-count" data-online-count aria-live="polite" hidden>Conectando…</p>
   <!-- <div> 
     <button onclick="document.getElementById('player').play()">Play</button> 
     <button onclick="document.getElementById('player').pause()">Pause</button> 
@@ -23,6 +24,7 @@
 
 
 <style>  
+  .online-count { margin-top: .75rem; font-size: var(--text-sm); color: var(--gray-200); text-align: center; }
 
   .mi-audio{
     display: block;
