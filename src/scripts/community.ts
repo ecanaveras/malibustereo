@@ -1,7 +1,23 @@
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously } from 'firebase/auth';
+import { getDatabase, ref, push, set, onValue, onDisconnect, query, orderByChild, startAt, endAt, limitToLast, get, remove, serverTimestamp } from 'firebase/database';
+
 const panel = document.querySelector<HTMLElement>('.community-panel');
-if (panel) startCommunity(panel);
 
 const NICKNAME_KEY = 'malibu-nickname';
+const RETENTION_MS = 18 * 60 * 60 * 1000;
+
+const firebaseConfig = {
+  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
+  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.PUBLIC_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID,
+};
+
+if (panel) startCommunity(panel);
 
 function startCommunity(panel: HTMLElement) {
   const form = panel.querySelector<HTMLFormElement>('form')!;
@@ -20,15 +36,14 @@ function startCommunity(panel: HTMLElement) {
   const nicknameCancel = dialog?.querySelector<HTMLButtonElement>('[data-nickname-cancel]');
   const emojiToggle = panel.querySelector<HTMLButtonElement>('[data-emoji-toggle]');
   const emojiPanel = panel.querySelector<HTMLElement>('[data-emoji-panel]');
-  let socket: WebSocket | undefined;
-  let retry: ReturnType<typeof setTimeout> | undefined;
-  let heartbeat: ReturnType<typeof setTimeout> | undefined;
+  let unsubscribeMessages: (() => void) | undefined;
+  let unsubscribePresence: (() => void) | undefined;
+  let removeOwnPresence: (() => Promise<void>) | undefined;
   let stopped = false;
   let ready = false;
   let sending = false;
-  let attempts = 0;
-  let generation = 0;
-  let pulseGeneration: number | undefined;
+  let firebaseUid = '';
+  let lastSentAt = 0;
   const seen = new Set<string>();
 
   function setStatus(label: string, connected = false) {
@@ -39,23 +54,10 @@ function startCommunity(panel: HTMLElement) {
     ready = connected;
     button.disabled = !ready || sending;
   }
-  async function request(action: string, body?: object) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10_000);
-    try {
-      const response = await fetch(`/api/community/${action}`, {
-        method: 'POST', credentials: 'same-origin', cache: 'no-store',
-        headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}), signal: controller.signal
-      });
-      const data = await response.json();
-      if (!response.ok) throw Object.assign(new Error(data.error || 'No se pudo conectar.'), { status: response.status });
-      return data;
-    } finally { clearTimeout(timeout); }
-  }
   function addMessage(event: any) {
     if (event?.type !== 'message' || typeof event.id !== 'string' || seen.has(event.id) ||
         typeof event.name !== 'string' || event.name.length > 24 || typeof event.text !== 'string' || event.text.length > 300 ||
-        typeof event.sentAt !== 'string' || !Number.isFinite(Date.parse(event.sentAt))) return;
+        !Number.isFinite(typeof event.sentAt === 'number' ? event.sentAt : Number(event.sentAt))) return;
     const nearBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 60;
     seen.add(event.id);
     panel.querySelector('.community-empty')?.remove();
@@ -65,8 +67,9 @@ function startCommunity(panel: HTMLElement) {
     const content = document.createElement('p');
     // User content is always text, never HTML or an executable link.
     author.textContent = event.name;
-    time.dateTime = event.sentAt;
-    time.textContent = new Date(event.sentAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    const sentAt = typeof event.sentAt === 'number' ? event.sentAt : Number(event.sentAt);
+    time.dateTime = new Date(sentAt).toISOString();
+    time.textContent = new Date(sentAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
     content.textContent = event.text;
     article.append(author, time, content);
     log.append(article);
@@ -239,60 +242,60 @@ function startCommunity(panel: HTMLElement) {
   text.addEventListener('input', autosize);
   autosize();
 
-  async function pulse(current: number) {
-    if (stopped || current !== generation || socket?.readyState !== WebSocket.OPEN || pulseGeneration === current) return;
-    pulseGeneration = current;
-    try {
-      const data = await request('presence');
-      if (stopped || current !== generation || socket?.readyState !== WebSocket.OPEN) return;
-      if (!Number.isInteger(data.count) || data.count < 0) throw new Error('Conteo inválido');
-      setStatus(`${data.count} ONLINE`, true);
-      attempts = 0;
-    } catch (error: any) {
-      if (stopped || current !== generation) return;
-      setStatus('Conexión interrumpida');
-      if ([401, 409].includes(error.status)) { socket?.close(); return; }
-    } finally {
-      if (pulseGeneration === current) pulseGeneration = undefined;
-    }
-    if (!stopped && current === generation && socket?.readyState === WebSocket.OPEN) {
-      clearTimeout(heartbeat);
-      heartbeat = setTimeout(() => pulse(current), ready ? 25_000 : 5000);
-    }
-  }
-  function scheduleReconnect(current: number) {
-    if (stopped || current !== generation) return;
-    clearTimeout(heartbeat);
-    clearTimeout(retry);
-    setStatus('Reconectando…');
-    retry = setTimeout(connect, Math.min(30_000, 1000 * 2 ** Math.min(attempts++, 5)) + Math.random() * 500);
-  }
   async function connect() {
     if (stopped) return;
-    clearTimeout(retry);
-    clearTimeout(heartbeat);
-    const current = ++generation;
-    socket?.close();
-    setStatus(attempts ? 'Reconectando…' : 'Conectando…');
+    setStatus('Conectando…');
     try {
-      // Serialize the first cookie creation across tabs of the same browser.
-      const data = navigator.locks
-        ? await navigator.locks.request('malibu-session', () => request('session'))
-        : await request('session');
-      if (stopped || current !== generation) return;
-      const url = new URL(data.url);
-      if (url.protocol !== 'wss:' && !(location.hostname === 'localhost' && url.protocol === 'ws:')) throw new Error('Conexión inválida');
-      const ws = socket = new WebSocket(url);
-      const opening = setTimeout(() => { if (ws.readyState !== WebSocket.OPEN) ws.close(); }, 10_000);
-      ws.onopen = () => { clearTimeout(opening); if (current === generation) void pulse(current); };
-      ws.onmessage = message => {
-        if (current !== generation || stopped) return;
-        try { addMessage(JSON.parse(message.data)); } catch { /* Ignore invalid service frames. */ }
-      };
-      ws.onerror = () => ws.close();
-      ws.onclose = () => { clearTimeout(opening); scheduleReconnect(current); };
-    } catch {
-      scheduleReconnect(current);
+      const required = Object.values(firebaseConfig).every(Boolean);
+      if (!required) throw new Error('Falta la configuración pública de Firebase.');
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const credential = await signInAnonymously(auth);
+      if (stopped) return;
+      firebaseUid = credential.user.uid;
+      const db = getDatabase(app);
+      const presenceRef = ref(db, `MalibuWeb Chat/presence/${firebaseUid}`);
+      await onDisconnect(presenceRef).remove();
+      await set(presenceRef, { connectedAt: serverTimestamp() });
+      removeOwnPresence = () => remove(presenceRef);
+      unsubscribePresence = onValue(ref(db, 'MalibuWeb Chat/presence'), snapshot => {
+        let count = 0;
+        snapshot.forEach(() => { count++; });
+        setStatus(`${count} ONLINE`, true);
+      }, () => setStatus('Conexión interrumpida'));
+
+      const cutoff = Date.now() - RETENTION_MS;
+      const messagesRef = ref(db, 'MalibuWeb Chat/messages');
+      const recentMessages = query(messagesRef, orderByChild('sentAt'), startAt(cutoff), limitToLast(100));
+      unsubscribeMessages = onValue(recentMessages, snapshot => {
+        log.replaceChildren();
+        seen.clear();
+        const messages: any[] = [];
+        snapshot.forEach(child => {
+          const value = child.val();
+          if (value && Number(value.sentAt) >= Date.now() - RETENTION_MS) messages.push({ ...value, id: child.key });
+        });
+        messages.forEach(addMessage);
+        if (!messages.length) {
+          const empty = document.createElement('p');
+          empty.className = 'community-empty';
+          empty.textContent = 'Los mensajes recientes aparecerán aquí cuando estés conectado.';
+          log.append(empty);
+        }
+        // Best-effort cleanup: rules must allow deletion only after expiry.
+        snapshot.forEach(child => {
+          const value = child.val();
+          if (value && Number(value.sentAt) < Date.now() - RETENTION_MS) {
+            void remove(ref(db, `MalibuWeb Chat/messages/${child.key}`)).catch(() => {});
+          }
+        });
+      }, () => setStatus('No se pudo cargar el chat'));
+      const expiredMessages = await get(query(messagesRef, orderByChild('sentAt'), endAt(cutoff), limitToLast(100)));
+      expiredMessages.forEach(child => {
+          void remove(ref(db, `MalibuWeb Chat/messages/${child.key}`)).catch(() => {});
+      });
+    } catch (error: any) {
+      setStatus(error?.message || 'No se pudo conectar');
     }
   }
   form.addEventListener('submit', async event => {
@@ -308,7 +311,12 @@ function startCommunity(panel: HTMLElement) {
     feedback.textContent = 'Enviando…';
     const submitted = text.value;
     try {
-      await request('message', { name: nameField.value, text: submitted });
+      if (Date.now() - lastSentAt < 3000) throw new Error('Espera unos segundos antes de enviar otro mensaje.');
+      const db = getDatabase();
+      const messageRef = push(ref(db, 'MalibuWeb Chat/messages'));
+      const sentAt = Date.now();
+      await set(messageRef, { type: 'message', id: messageRef.key, name: nameField.value, text: submitted, sentAt });
+      lastSentAt = sentAt;
       if (text.value === submitted) { text.value = ''; autosize(); }
       feedback.textContent = 'Mensaje enviado.';
       setEmojiPanel(false);
@@ -317,22 +325,15 @@ function startCommunity(panel: HTMLElement) {
       feedback.textContent = error.name === 'AbortError'
         ? 'No pudimos confirmar el envío. Revisa el chat antes de volver a enviarlo.'
         : error.message || 'No se pudo enviar. Tu mensaje sigue aquí.';
-      if ([401, 409].includes(error.status)) socket?.close();
     } finally { sending = false; button.disabled = !ready; }
   });
   window.addEventListener('pagehide', () => {
     stopped = true;
-    generation++;
-    clearTimeout(retry);
-    clearTimeout(heartbeat);
-    socket?.close();
+    unsubscribeMessages?.();
+    unsubscribePresence?.();
+    void removeOwnPresence?.();
   });
   window.addEventListener('pageshow', event => { if (event.persisted) { stopped = false; void connect(); } });
   window.addEventListener('online', () => { if (!stopped && !ready) void connect(); });
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && !stopped && socket?.readyState === WebSocket.OPEN) {
-      clearTimeout(heartbeat); void pulse(generation);
-    }
-  });
   void connect();
 }

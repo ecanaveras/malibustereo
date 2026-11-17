@@ -1,0 +1,23 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "MalibuWeb Chat": {
+      "messages": {
+        ".read": "auth != null",
+        ".indexOn": ["sentAt"],
+        "$messageId": {
+          ".write": "auth != null && ((!data.exists() && newData.exists() && newData.child('sentAt').val() <= now && newData.child('sentAt').val() > now - 60000) || (data.exists() && !newData.exists() && data.child('sentAt').val() < now - 64800000))",
+          ".validate": "!newData.exists() || (newData.hasChildren(['id', 'type', 'name', 'text', 'sentAt']) && newData.child('id').val() == $messageId && newData.child('type').val() == 'message' && newData.child('name').isString() && newData.child('name').val().length >= 2 && newData.child('name').val().length <= 24 && newData.child('text').isString() && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 300 && newData.child('sentAt').isNumber() && newData.getPriority() == null)"
+        }
+      },
+      "presence": {
+        ".read": "auth != null",
+        "$uid": {
+          ".write": "auth != null && auth.uid == $uid",
+          ".validate": "!newData.exists() || (newData.hasChild('connectedAt') && newData.child('connectedAt').isNumber())"
+        }
+      }
+    }
+  }
+}
